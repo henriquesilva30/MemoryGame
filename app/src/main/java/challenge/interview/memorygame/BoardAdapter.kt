@@ -10,13 +10,15 @@ import androidx.cardview.widget.CardView
 import androidx.core.view.setMargins
 import androidx.recyclerview.widget.RecyclerView
 import challenge.interview.memorygame.Models.BoardSize
+import challenge.interview.memorygame.Models.MemoryCard
 import java.util.Collections.min
 import kotlin.math.min
 
 class BoardAdapter(
     private val context: Context,
     private val boardSize: BoardSize,
-    private val cardImages: List<Int>
+    private val cards: List<MemoryCard>,
+    private val cardClickListenner: CardClickListenner,
 ):
     RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
 
@@ -24,6 +26,10 @@ class BoardAdapter(
     companion object {
         private const val MARGIN_SIZE=10
         private const val TAG = "BoardAdapter"
+    }
+
+    interface CardClickListenner{
+        fun onCardClickListenner(position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -48,9 +54,12 @@ class BoardAdapter(
         private val imageButton = itemView.findViewById<ImageButton>(R.id.imageButton2)
 
         fun bind(position: Int){
-            imageButton.setImageResource(cardImages[position])
+            val memoryCard = cards[position]
+            imageButton.setImageResource(if(memoryCard.isFaceUp) memoryCard.identifier else R.drawable.ic_launcher_background)
             imageButton.setOnClickListener{
                 Log.i(TAG,"Clicked on position $position")
+                cardClickListenner.onCardClickListenner(position)
+
             }
             }
 
