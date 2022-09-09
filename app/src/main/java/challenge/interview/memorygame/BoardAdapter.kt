@@ -13,7 +13,11 @@ import challenge.interview.memorygame.Models.BoardSize
 import java.util.Collections.min
 import kotlin.math.min
 
-class BoardAdapter(private val context: Context, private val boardSize: BoardSize):
+class BoardAdapter(
+    private val context: Context,
+    private val boardSize: BoardSize,
+    private val cardImages: List<Int>
+):
     RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
 
     // its like singleton where we define const
@@ -44,6 +48,7 @@ class BoardAdapter(private val context: Context, private val boardSize: BoardSiz
         private val imageButton = itemView.findViewById<ImageButton>(R.id.imageButton2)
 
         fun bind(position: Int){
+            imageButton.setImageResource(cardImages[position])
             imageButton.setOnClickListener{
                 Log.i(TAG,"Clicked on position $position")
             }

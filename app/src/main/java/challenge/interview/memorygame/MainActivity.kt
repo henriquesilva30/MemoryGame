@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import challenge.interview.memorygame.Models.BoardSize
+import challenge.interview.memorygame.Utils.DEFAULT_ICONS
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,7 +14,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var moves: TextView
     private lateinit var pairs: TextView
 
-    private val boardSize: BoardSize = BoardSize.Hard
+    private var boardSize: BoardSize = BoardSize.Hard
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +24,10 @@ class MainActivity : AppCompatActivity() {
         moves = findViewById(R.id.movestv)
         pairs = findViewById(R.id.pairstv)
 
-        recyclerBoard.adapter = BoardAdapter(this,boardSize)
+        val chosenImages = DEFAULT_ICONS.shuffled().take(boardSize.getNumPairs())
+        val randomizedImages = (chosenImages + chosenImages).shuffled()
+
+        recyclerBoard.adapter = BoardAdapter(this,boardSize,randomizedImages)
         recyclerBoard.setHasFixedSize(true)
        // adjust later for different sizes
         recyclerBoard.layoutManager = GridLayoutManager(this,boardSize.getWidth())
