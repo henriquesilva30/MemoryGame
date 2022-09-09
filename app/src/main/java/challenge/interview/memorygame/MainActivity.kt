@@ -1,11 +1,13 @@
 package challenge.interview.memorygame
 
+import android.animation.ArgbEvaluator
 import android.content.ContentValues.TAG
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import challenge.interview.memorygame.Models.BoardSize
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         clRoot = findViewById(R.id.clRoot)
 
         memoryGame = MemoryGame(boardSize)
-
+        pairs.setTextColor(ContextCompat.getColor(this,R.color.color_progress_none))
         adapter = BoardAdapter(this,boardSize,memoryGame.cards,object: BoardAdapter.CardClickListenner{
             override fun onCardClickListenner(position: Int) {
                 //Log.i(TAG,"Card clicked $position")
@@ -57,15 +59,31 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateGameWithFlip(position: Int) {
+        //error checking
         if(memoryGame.haveWonGame()){
             Snackbar.make(clRoot,"You already won!",Snackbar.LENGTH_SHORT).show()
             return
         }
+        //error checking
         if (memoryGame.isCardFaceUp(position)){
             Snackbar.make(clRoot,"Invalid move!",Snackbar.LENGTH_SHORT).show()
             return
         }
-        memoryGame.flipCard(position)
+        //Acttualy flip over the card
+        if(memoryGame.flipCard(position)){
+            Log.i(TAG,"Found the match! Num pairs found :${memoryGame.numPairsFound}")
+            val color = ArgbEvaluator().evaluate(
+                memoryGame.numPairsFound.toFloat()/boardSize.getNumPairs(),
+                ContextCompat.getColor(this,R.color.color_progress_none),
+                ContextCompat.getColor(this,R.color.color_progress_full)
+            ) as Int
+            pairs.setTextColor(color)
+            pairs.text = "Pairs: ${memoryGame.numPairsFound}/${boardSize.getNumPairs()}"
+            if (memoryGame.haveWonGame()){
+                Snackbar.make(clRoot,"You won! Congratulations!",Snackbar.LENGTH_SHORT).show()
+            }
+        }
+        moves.text = "Moves: ${memoryGame.getNumMoves()}"
         adapter.notifyDataSetChanged()
     }
 }
