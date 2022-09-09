@@ -9,10 +9,11 @@ import android.widget.ImageButton
 import androidx.cardview.widget.CardView
 import androidx.core.view.setMargins
 import androidx.recyclerview.widget.RecyclerView
+import challenge.interview.memorygame.Models.BoardSize
 import java.util.Collections.min
 import kotlin.math.min
 
-class BoardAdapter(private val context: Context, private val numberCards:Int):
+class BoardAdapter(private val context: Context, private val boardSize: BoardSize):
     RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
 
     // its like singleton where we define const
@@ -23,8 +24,8 @@ class BoardAdapter(private val context: Context, private val numberCards:Int):
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
        val view = LayoutInflater.from(context).inflate(R.layout.item_card,parent,false)
-        val cardWidth = parent.width/2 - (2 * MARGIN_SIZE)
-        val cardHeight = parent.height/4 - (2 * MARGIN_SIZE)
+        val cardWidth = parent.width/boardSize.getWidth() - (2 * MARGIN_SIZE)
+        val cardHeight = parent.height/boardSize.getHeight() - (2 * MARGIN_SIZE)
         val cardSideLength = min(cardWidth,cardHeight)
         val layoutParams = view.findViewById<CardView>(R.id.cardView).layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.width = cardSideLength
@@ -33,7 +34,7 @@ class BoardAdapter(private val context: Context, private val numberCards:Int):
         return ViewHolder(view)
     }
 
-    override fun getItemCount() = numberCards
+    override fun getItemCount() = boardSize.numCards
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(position)
