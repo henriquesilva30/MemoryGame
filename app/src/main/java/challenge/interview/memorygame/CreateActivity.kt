@@ -7,6 +7,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextWatcher
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
@@ -24,6 +27,8 @@ class CreateActivity : AppCompatActivity() {
     companion object {
         private const val PICK_PHOTO_CODE = 655
         private const val TAG = "CreateActivity"
+        private const val MIN_GAME_NAME_LENGTH = 3
+        private const val MAX_GAME_NAME_LENGTH = 14
         private const val READ_EXTERNAL_PHOTO_CODE = 248
         private const val READ_PHOTOS_PERMISSION = android.Manifest.permission.READ_EXTERNAL_STORAGE
     }
@@ -51,12 +56,27 @@ class CreateActivity : AppCompatActivity() {
         numImagesRequired = boardSize.getNumPairs()
         supportActionBar?.title = "Choose pics (0/$numImagesRequired)"
 
-        val adapter = ImagePickerAdapter(this,chosenImgUris,boardSize, object: ImagePickerAdapter.ImageClickListener{
+        btnSave.setOnClickListener{
+            saveDataToFireBase()
+        }
+        etGame.filters= arrayOf(InputFilter.LengthFilter(MAX_GAME_NAME_LENGTH))
+        etGame.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                btnSave.isEnabled = shouldEnableSaveButton()
+            }
+
+        })
+
+        adapter = ImagePickerAdapter(this,chosenImgUris,boardSize, object: ImagePickerAdapter.ImageClickListener{
             override fun onPlaceHolderClicked() {
                 if(isPermissionGranted(this@CreateActivity,READ_PHOTOS_PERMISSION)) {
                     launchIntentForPhotos()
                 }else {
-                    requestPermission(this@CreateActivity, READ_PHOTOS_PERMISSION,READ_EXTERNAL_PHOTO_CODE,)
+                    requestPermission(this@CreateActivity, READ_PHOTOS_PERMISSION,READ_EXTERNAL_PHOTO_CODE)
                 }
             }
 
@@ -67,15 +87,19 @@ class CreateActivity : AppCompatActivity() {
 
     }
 
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        if(requestCode == READ_EXTERNAL_PHOTO_CODE){
+
         if (grantResults.isNotEmpty() && grantResults[0]== PackageManager.PERMISSION_GRANTED){
             launchIntentForPhotos()
         }else {
             Toast.makeText(this,"In order to create custom game, you need to provide access to your photos",Toast.LENGTH_SHORT).show()
+        }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -111,6 +135,17 @@ class CreateActivity : AppCompatActivity() {
         }
         adapter.notifyDataSetChanged()
         supportActionBar?.title = "Choose pics (${chosenImgUris.size}/$numImagesRequired)"
+        btnSave.isEnabled = shouldEnableSaveButton()
+    }
+
+    private fun shouldEnableSaveButton(): Boolean {
+        if(chosenImgUris.size != numImagesRequired) {
+            return false
+        }
+        if(etGame.text.isBlank() || etGame.text.length < MIN_GAME_NAME_LENGTH){
+            return false
+        }
+        return true
     }
 
     private fun launchIntentForPhotos() {
@@ -118,5 +153,10 @@ class CreateActivity : AppCompatActivity() {
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true)
         startActivityForResult(Intent.createChooser(intent,"Choose pics"),PICK_PHOTO_CODE)
+    }
+    private fun saveDataToFireBase() {
+        Log.i(TAG,"saveDataToFireBase")
+
+
     }
 }
