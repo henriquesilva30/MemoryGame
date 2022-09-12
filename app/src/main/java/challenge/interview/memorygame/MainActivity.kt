@@ -2,6 +2,7 @@ package challenge.interview.memorygame
 
 import android.animation.ArgbEvaluator
 import android.content.ContentValues.TAG
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -20,12 +21,16 @@ import challenge.interview.memorygame.Models.BoardSize
 import challenge.interview.memorygame.Models.MemoryCard
 import challenge.interview.memorygame.Models.MemoryGame
 import challenge.interview.memorygame.Utils.DEFAULT_ICONS
+import challenge.interview.memorygame.Utils.EXTRA_BOARD_SIZE
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MainActivity"
+        private const val CREATE_REQUEST_CODE = 248
+
+
     }
 
     private lateinit var adapter: BoardAdapter
@@ -40,6 +45,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val intent = Intent(this,CreateActivity::class.java)
+        intent.putExtra(EXTRA_BOARD_SIZE,BoardSize.Medium)
+        startActivity(intent)
 
         recyclerBoard = findViewById(R.id.rvCard)
         moves = findViewById(R.id.movestv)
@@ -100,8 +109,26 @@ class MainActivity : AppCompatActivity() {
                 showNewSizeDialog()
                 return true
             }
+            R.id.mi_custom -> {
+                showCreationDialog()
+            }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showCreationDialog() {
+        val boardSizeView = LayoutInflater.from(this).inflate(R.layout.dialog_board_size, null)
+        val radioGroupSize = boardSizeView.findViewById<RadioGroup>(R.id.radioGroup)
+        showAlertDialog("Create your own memory board", boardSizeView, View.OnClickListener {
+            val desiredBoardSize = when (radioGroupSize.checkedRadioButtonId) {
+                R.id.rbEasy -> BoardSize.Easy
+                R.id.rbMedium -> BoardSize.Medium
+                else -> BoardSize.Hard
+            }
+            val intent = Intent(this,CreateActivity::class.java)
+            intent.putExtra(EXTRA_BOARD_SIZE,desiredBoardSize)
+            startActivityForResult(intent,CREATE_REQUEST_CODE)
+        })
     }
 
     private fun showNewSizeDialog() {
