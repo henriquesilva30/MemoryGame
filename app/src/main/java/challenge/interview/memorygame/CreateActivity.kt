@@ -1,12 +1,15 @@
 package challenge.interview.memorygame
 
 import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
@@ -18,9 +21,11 @@ import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import challenge.interview.memorygame.Models.BoardSize
+import challenge.interview.memorygame.Utils.BitmapScaler
 import challenge.interview.memorygame.Utils.EXTRA_BOARD_SIZE
 import challenge.interview.memorygame.Utils.isPermissionGranted
 import challenge.interview.memorygame.Utils.requestPermission
+import java.io.ByteArrayOutputStream
 
 class CreateActivity : AppCompatActivity() {
 
@@ -156,7 +161,26 @@ class CreateActivity : AppCompatActivity() {
     }
     private fun saveDataToFireBase() {
         Log.i(TAG,"saveDataToFireBase")
+        for ((index,photoUri) in chosenImgUris.withIndex()){
+            val imageByteArray = getImageByteArray(photoUri)
+        }
 
+
+    }
+
+    private fun getImageByteArray(photoUri: Uri): ByteArray {
+        val originalBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+            val source = ImageDecoder.createSource(contentResolver,photoUri)
+            ImageDecoder.decodeBitmap(source)
+        } else {
+            MediaStore.Images.Media.getBitmap(contentResolver,photoUri)
+        }
+        Log.i(TAG,"original width ${originalBitmap.width} and height ${originalBitmap.height}")
+        val scaledBitmap = BitmapScaler.scaleToFitHeight(originalBitmap,250)
+        Log.i(TAG,"sacled width ${scaledBitmap.width} and height ${scaledBitmap.height}")
+        val byteOutputStream = ByteArrayOutputStream()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG,60,byteOutputStream)
+        return byteOutputStream.toByteArray()
 
     }
 }
