@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val intent = Intent(this,CreateActivity::class.java)
-        intent.putExtra(EXTRA_BOARD_SIZE,BoardSize.Medium)
+        intent.putExtra(EXTRA_BOARD_SIZE,BoardSize.Easy)
         startActivity(intent)
 
         recyclerBoard = findViewById(R.id.rvCard)
