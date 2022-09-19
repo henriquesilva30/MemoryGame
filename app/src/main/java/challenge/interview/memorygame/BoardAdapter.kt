@@ -13,6 +13,7 @@ import androidx.core.view.setMargins
 import androidx.recyclerview.widget.RecyclerView
 import challenge.interview.memorygame.Models.BoardSize
 import challenge.interview.memorygame.Models.MemoryCard
+import com.squareup.picasso.Picasso
 import java.util.Collections.min
 import kotlin.math.min
 
@@ -57,7 +58,16 @@ class BoardAdapter(
 
         fun bind(position: Int){
             val memoryCard = cards[position]
-            imageButton.setImageResource(if(memoryCard.isFaceUp) memoryCard.identifier else R.drawable.ic_launcher_background)
+            if(memoryCard.isFaceUp){
+                if (memoryCard.imageUrl != null){
+                    Picasso.get().load(memoryCard.imageUrl).placeholder(R.drawable.ic_image).into(imageButton)
+                } else {
+                    imageButton.setImageResource(memoryCard.identifier)
+                }
+            } else {
+            imageButton.setImageResource(R.drawable.ic_launcher_background)
+            }
+
 
             imageButton.alpha = if (memoryCard.isMatch) .4f else 1.0f
             val colorStateList = if(memoryCard.isMatch) ContextCompat.getColorStateList(context,R.color.color_gray) else null
