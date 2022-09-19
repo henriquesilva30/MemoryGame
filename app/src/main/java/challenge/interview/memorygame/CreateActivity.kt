@@ -1,5 +1,6 @@
 package challenge.interview.memorygame
 
+import ImagePickerAdapter
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -44,7 +45,7 @@ class CreateActivity : AppCompatActivity() {
     private lateinit var rvImagePicker:RecyclerView
     private lateinit var etGame:EditText
     private lateinit var btnSave:Button
-    private lateinit var adapter: ImagePickerAdapter
+    private lateinit var imagePickerAdapter: ImagePickerAdapter
     private lateinit var pbUploading: ProgressBar
 
 
@@ -83,17 +84,12 @@ class CreateActivity : AppCompatActivity() {
 
         })
 
-        adapter = ImagePickerAdapter(this,chosenImgUris,boardSize, object: ImagePickerAdapter.ImageClickListener{
-            override fun onPlaceHolderClicked() {
-                if(isPermissionGranted(this@CreateActivity,READ_PHOTOS_PERMISSION)) {
-                    launchIntentForPhotos()
-                }else {
-                    requestPermission(this@CreateActivity, READ_PHOTOS_PERMISSION,READ_EXTERNAL_PHOTO_CODE)
-                }
+        imagePickerAdapter = ImagePickerAdapter(this, chosenImgUris, boardSize, object: ImagePickerAdapter.ImageClickListener {
+            override fun onPlaceholderClicker() {
+                launchIntentForPhotos()
             }
-
         })
-        rvImagePicker.adapter = adapter
+        rvImagePicker.adapter = imagePickerAdapter
         rvImagePicker.setHasFixedSize(true)
         rvImagePicker.layoutManager = GridLayoutManager(this,boardSize.getWidth())
 
@@ -145,7 +141,7 @@ class CreateActivity : AppCompatActivity() {
             Log.i(TAG,"data: $selectedUri")
             chosenImgUris.add(selectedUri)
         }
-        adapter.notifyDataSetChanged()
+        imagePickerAdapter.notifyDataSetChanged()
         supportActionBar?.title = "Choose pics (${chosenImgUris.size}/$numImagesRequired)"
         btnSave.isEnabled = shouldEnableSaveButton()
     }
